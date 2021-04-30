@@ -11,10 +11,10 @@ from screens import MainWindow
 
 #kv = Builder.load_file("to_do_.kv")
 sm = WindowManager()
-screens = [MainWindow.MainWindow(name="MainWindow")]
-for screen in screens:
-    sm.add_widget(screen)
-sm.current = "MainWindow"
+#screens = [MainWindow.MainWindow(name="MainWindow")]
+#for screen in screens:
+#    sm.add_widget(screen)
+#sm.current = "MainWindow"
 
 
 
