@@ -1,0 +1,50 @@
+WindowManager:
+    MainWindow:
+    #AddTasksWindow:
+    #StatisticsWindow:
+    #SettingsWindow:
+    #NavigationWindow:
+
+<MainWindow>
+    name: "MainWindow"
+    
+
+    FloatLayout:
+        cols:1
+        BoxLayout:
+            canvas:
+                Color: 
+                    rgba: 0.38,0.36,0.36, 1 
+                Rectangle:
+                    pos: self.pos
+                    size: self.size                 
+            size_hint: 1, 0.1
+            
+            Button: 
+
+                id: NavigationButton
+                text:""  
+                background_color:  0.38,0.36,0.36, 1                                        
+                on_release:
+                    root.change_screen()
+                Image:
+                    source: "./images/navigation.png"
+                    width: NavigationButton.width
+                    allow_stretch: True
+                    height: NavigationButton.height
+            Button: 
+                id: addToDoButton  
+                text:""
+                background_normal: ""
+                on_release:
+                    root.change_screen()
+                Image:
+                    source: "./images/add.png"
+                    width: addToDoButton.width
+                    allow_stretch: True
+                    height: addToDoButton.height
+                    pos: addToDoButton.pos
+
+
+                
+            

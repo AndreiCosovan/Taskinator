@@ -1,0 +1,49 @@
+WindowManager:
+    MainWindow:
+    #AddTasksWindow:
+    #StatisticsWindow:
+    #SettingsWindow:
+    #NavigationWindow:
+
+<MainWindow>
+    name: "MainWindow"
+    
+
+    FloatLayout:
+        cols:1
+        BoxLayout:
+            orientation:'vertical'
+
+
+            MDBottomNavigation:
+                panel_color: .49, .14, .11, 1
+                
+
+                MDBottomNavigationItem:
+                    name: 'Homescreen'
+                    text: 'Home'
+                    icon: 'home-outline'
+
+
+
+
+
+                MDBottomNavigationItem:
+                    name: 'addToDoScreen'
+                    text: 'add'
+                    icon: 'plus-outline'
+
+
+                MDBottomNavigationItem:
+                    name: 'statisticsScreen'
+                    text: 'stats'
+                    icon: 'clipboard-check'
+
+
+                MDBottomNavigationItem:
+                    name: 'settingsScreen'
+                    text: 'settings'
+                    icon: 'settings'
+
+        
+                
