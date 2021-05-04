@@ -3,6 +3,7 @@ FloatLayout:
     cols:1
     BoxLayout:
         orientation:'vertical'
+        
         MDToolbar:
             title: "ADD A TASK!"
             md_bg_color: .49, .14, .11, 1
@@ -37,14 +38,25 @@ FloatLayout:
                             icon: "calendar"
                         MDLabel:
                             text: "No due date picked"
+                            theme_text_color: "Custom"
+                            text_color: 1, 1, 1, 1
                     MDBoxLayout:
                         orientation: 'horizontal'
                         adaptive_height: True
                         MDCheckbox:
                             size_hint: None, None
                             size: "48dp", "48dp"
+                            unselected_color: 1, 1, 1, 1
+                            selected_color: 1, 1, 1, 1
                         MDLabel:
                             text: "Not important!"
+                            theme_text_color: "Custom"
+                            text_color: 1, 1, 1, 1
+
+                    MDFillRoundFlatButton:
+                        text:"ADD"
+                        md_bg_color: .49, .14, .11, 1
+                        pos_hint: {"center_x": 0.9, "center_y": .5}
                     MDLabel:
                         text: ""
             MDBottomNavigationItem:
