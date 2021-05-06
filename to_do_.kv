@@ -38,6 +38,7 @@ FloatLayout:
                             icon: "calendar"
                             on_release: app.show_date_picker()
                         MDLabel:
+                            id: date_label
                             text: "No due date picked"
                             theme_text_color: "Custom"
                             text_color: 1, 1, 1, 1
@@ -49,7 +50,9 @@ FloatLayout:
                             size: "48dp", "48dp"
                             unselected_color: 1, 1, 1, 1
                             selected_color: 1, 1, 1, 1
+                            on_active: app.on_important_checkbox_active(*args)
                         MDLabel:
+                            id: important_label
                             text: "Not important!"
                             theme_text_color: "Custom"
                             text_color: 1, 1, 1, 1
@@ -58,6 +61,7 @@ FloatLayout:
                         text:"ADD"
                         md_bg_color: .49, .14, .11, 1
                         pos_hint: {"center_x": 0.9, "center_y": .5}
+                        on_release: app.add_task()
                     MDLabel:
                         text: ""
             MDBottomNavigationItem:

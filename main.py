@@ -9,9 +9,11 @@ from kivy.uix.screenmanager import ScreenManager, Screen
 from WindowManager import WindowManager
 from screens import MainWindow
 from kivymd.uix.picker import MDDatePicker
-
+from Storage import Storage
+from Task import Task
 #kv = Builder.load_file("to_do_.kv")
 sm = WindowManager()
+storage = Storage()
 #screens = [MainWindow.MainWindow(name="MainWindow")]
 #for screen in screens:
 #    sm.add_widget(screen)
@@ -35,7 +37,28 @@ class to_do_App(MDApp):
         date_dialog.open()
 
     def on_save(self, date):
-        print(date)
+        self.root.ids.date_label.text = str(date)
+
+    def on_important_checkbox_active(self, checkbox, value):
+        if value:
+            self.root.ids.important_label.text = "Important!"
+        else:
+            self.root.ids.important_label.text = "Not important!"
+
+    def add_task(self):
+        task_name = self.root.ids.input_of_to_do.text
+        due_date = self.root.ids.date_label.text
+        if self.root.ids.important_label.text == "Important!":
+            is_important = True
+        else:
+            is_important = False
+
+        task = [task_name, due_date, is_important]
+        storage.add_data(task)
+
+        
+
+
 
 
 
