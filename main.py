@@ -11,6 +11,7 @@ from screens import MainWindow
 from kivymd.uix.picker import MDDatePicker
 from Storage import Storage
 from Task import Task
+from kivymd.uix.list import ThreeLineIconListItem
 #kv = Builder.load_file("to_do_.kv")
 sm = WindowManager()
 storage = Storage()
@@ -52,9 +53,30 @@ class to_do_App(MDApp):
             is_important = True
         else:
             is_important = False
+        task = {
+            "name": task_name,
+            "due_date": due_date,
+            "is_important": is_important
+        }
+        try:
+            task_list = list(storage.get_data())
+        except:
+            task_list=list()
+        task_list.append(task)
+        self.root.ids.to_do_container.clear_widgets()
+        for task in task_list:
+            self.root.ids.to_do_container.add_widget(
+                ThreeLineIconListItem(text=task["name"], secondary_text=task["due_date"], tertiary_text=str(task["is_important"]))
+            )
+        storage.add_data(task_list)
+        
 
-        task = [task_name, due_date, is_important]
-        storage.add_data(task)
+    def update_tasks(self):
+        task_list = storage.get_data()
+        for task in task_list:
+            self.root.ids.to_do_container.add_widget(
+                ThreeLineIconListItem(text=task["name"], secondary_text=task["due_date"], tertiary_text=task["is_important"], icon="checkbox-blank")
+            )
 
         
 
