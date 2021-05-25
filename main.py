@@ -11,7 +11,7 @@ from screens import MainWindow
 from kivymd.uix.picker import MDDatePicker
 from Storage import Storage
 from Task import Task
-from kivymd.uix.list import ThreeLineIconListItem
+from kivymd.uix.list import IconLeftWidget, ThreeLineIconListItem
 #kv = Builder.load_file("to_do_.kv")
 sm = WindowManager()
 storage = Storage()
@@ -31,6 +31,18 @@ class to_do_App(MDApp):
     def build(self):
         self.root = Builder.load_file('to_do_.kv')
         self.theme_cls.theme_style = "Dark"
+        #showing tasks
+        try:
+            task_list = list(storage.get_data())
+        except:
+            task_list=list()
+        for task in task_list:
+            
+            list_item = ThreeLineIconListItem(text=task["name"], secondary_text=task["due_date"], tertiary_text=str(task["is_important"]))
+            icon = IconLeftWidget(icon="checkbox-blank-circle") if task["is_done"]==False else IconLeftWidget(icon="checkbox.marked-circle")
+            list_item.add_widget(icon)
+            self.root.ids.to_do_container.add_widget(list_item)
+        
 
     def show_date_picker(self):
         date_dialog = MDDatePicker(callback=self.on_save)
@@ -56,18 +68,24 @@ class to_do_App(MDApp):
         task = {
             "name": task_name,
             "due_date": due_date,
-            "is_important": is_important
+            "is_important": is_important,
+            "is_done": False
         }
         try:
             task_list = list(storage.get_data())
         except:
             task_list=list()
         task_list.append(task)
+        #updating tasks
         self.root.ids.to_do_container.clear_widgets()
         for task in task_list:
-            self.root.ids.to_do_container.add_widget(
-                ThreeLineIconListItem(text=task["name"], secondary_text=task["due_date"], tertiary_text=str(task["is_important"]))
-            )
+            list_item = ThreeLineIconListItem(text=task["name"], secondary_text=task["due_date"], tertiary_text=str(task["is_important"]))
+            icon = IconLeftWidget(icon="checkbox-blank-circle") if task["is_done"]==False else IconLeftWidget(icon="checkbox.marked-circle")
+            list_item.add_widget(icon)
+            self.root.ids.to_do_container.add_widget(list_item)
+            # self.root.ids.to_do_container.add_widget(
+            #     ThreeLineIconListItem(text=task["name"], secondary_text=task["due_date"], tertiary_text=str(task["is_important"]))
+            # )
         storage.add_data(task_list)
         
 
