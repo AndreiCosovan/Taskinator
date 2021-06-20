@@ -2,17 +2,15 @@ import kivy
 from kivymd.app import MDApp
 from WindowManager import WindowManager
 kivy.require('2.0.0')  # replace with your current kivy version !
-from kivy.app import App
-from kivy.uix.widget import Widget
 from kivy.lang import Builder
-from kivy.uix.screenmanager import ScreenManager, Screen
 from WindowManager import WindowManager
 from screens import MainWindow
 from kivymd.uix.picker import MDDatePicker
 from Storage import Storage
-from Task import Task
-from kivymd.uix.list import IconLeftWidget, ThreeLineIconListItem
+from kivymd.uix.list import IconLeftWidget, IconRightWidget, ThreeLineAvatarIconListItem
 from functools import partial
+from kivymd.uix.dialog import MDDialog
+from kivymd.uix.button import MDFlatButton
 import uuid
 #kv = Builder.load_file("to_do_.kv")
 sm = WindowManager()
@@ -29,10 +27,10 @@ storage = Storage()
 
 
 class to_do_App(MDApp):
+    dialog = None
     def build(self):
         self.root = Builder.load_file('to_do_.kv')
         self.theme_cls.theme_style = "Dark"
-        #showing tasks
         task_list = self.read_tasks()
         self.load_tasks(task_list)       
 
@@ -65,19 +63,14 @@ class to_do_App(MDApp):
         }
         task_list = self.read_tasks()
         task_list.append(task)
-        self.reload_tasks(task_list)
-
-            
-            
+        self.reload_tasks(task_list)     
         storage.save_data(task_list)
         
     def task_on_release(self, args, kwargs):
         args["is_done"]=True if args["is_done"]==False else False
-        print("is_done="+str(args["is_done"]))
         self.update_task(args)
 
     def update_task(self, task_to_change):
-        print("update task")
         task_list = self.read_tasks()
         for task in task_list:
             if task["id"]==task_to_change["id"]:
@@ -96,16 +89,45 @@ class to_do_App(MDApp):
     def reload_tasks(self, task_list):
         self.root.ids.to_do_container.clear_widgets()
         self.load_tasks(task_list)
-        print("reload_tasks")
 
     def load_tasks(self, task_list):
         for task in task_list:
             
-            list_item = ThreeLineIconListItem(text=task["name"], secondary_text=task["due_date"], tertiary_text=str(task["is_important"]), on_release=partial(self.task_on_release, task))
-            icon = IconLeftWidget(icon="checkbox-blank-circle", on_release=partial(self.task_on_release, task)) if task["is_done"]==False else IconLeftWidget(icon="checkbox-marked-circle", on_release=partial(self.task_on_release, task))
-            list_item.add_widget(icon)
+            list_item = ThreeLineAvatarIconListItem(text=task["name"], secondary_text=task["due_date"], tertiary_text=str(task["is_important"]), on_release=partial(self.task_on_release, task))
+            remove_icon = IconRightWidget(icon="close", on_release=partial(self.show_remove_task_alert_dialog, task))
+            list_item.add_widget(remove_icon)
+            check_icon = IconLeftWidget(icon="checkbox-blank-circle", on_release=partial(self.task_on_release, task)) if task["is_done"]==False else IconLeftWidget(icon="checkbox-marked-circle", on_release=partial(self.task_on_release, task))
+            list_item.add_widget(check_icon)
+            
             self.root.ids.to_do_container.add_widget(list_item)
 
+    def remove_task(self, task, kwargs):
+        task_list = self.read_tasks()
+        new_list = [i for i in task_list if not (i['id'] == task['id'])]
+        storage.save_data(new_list)
+        self.reload_tasks(new_list)
+        self.close_dialog(None)
+
+    def close_dialog(self, kwargs):
+        self.dialog.dismiss()
+        
+        
+
+    def show_remove_task_alert_dialog(self, task, kwargs):
+        self.dialog = MDDialog(
+            text="Remove task?",
+            buttons=[
+                MDFlatButton(
+                    text="CANCEL", text_color=self.theme_cls.primary_color, on_release=self.close_dialog
+                ),
+                MDFlatButton(
+                    text="REMOVE", text_color=self.theme_cls.primary_color, on_release=partial(self.remove_task, task)
+                ),
+            ],
+            size_hint=(0.7, 1)
+        )
+        self.dialog.open()
+        
 
 
 
