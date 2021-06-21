@@ -6,10 +6,8 @@ FloatLayout:
         orientation:'vertical'
         MDToolbar:
             title: "ADD A TASK!"
-            md_bg_color: .49, .14, .11, 1
 
         MDBottomNavigation:
-            panel_color: .49, .14, .11, 1
             MDBottomNavigationItem:
                 name: 'Homescreen'
                 text: 'Home'
@@ -29,7 +27,6 @@ FloatLayout:
                     MDTextField:
                         id: input_of_to_do
                         hint_text: "Type in your Task!"
-                        color_mode: 'custom'
                         pos_hint: {'x': 0, 'y': 0}
 
                     MDBoxLayout:
@@ -41,26 +38,24 @@ FloatLayout:
                         MDLabel:
                             id: date_label
                             text: "No due date picked"
-                            theme_text_color: "Custom"
-                            text_color: 1, 1, 1, 1
+                            theme_text_color: "Primary"
+                            #text_color: app.theme_cls.accent_palette
                     MDBoxLayout:
                         orientation: 'horizontal'
                         adaptive_height: True
                         MDCheckbox:
                             size_hint: None, None
                             size: "48dp", "48dp"
-                            unselected_color: 1, 1, 1, 1
-                            selected_color: 1, 1, 1, 1
+                            #unselected_color: 1, 1, 1, 1
+                            #selected_color: 1, 1, 1, 1
                             on_active: app.on_important_checkbox_active(*args)
                         MDLabel:
                             id: important_label
                             text: "Not important!"
-                            theme_text_color: "Custom"
-                            text_color: 1, 1, 1, 1
+                            theme_text_color: "Primary"
 
                     MDFillRoundFlatButton:
                         text:"ADD"
-                        md_bg_color: .49, .14, .11, 1
                         pos_hint: {"center_x": 0.9, "center_y": .5}
                         on_release: app.add_task()
                     MDLabel:
@@ -75,3 +70,22 @@ FloatLayout:
                 name: 'settingsScreen'
                 text: 'settings'
                 icon: 'settings'
+                MDFloatLayout:
+                    MDRaisedButton:
+                        text: "Open theme picker"
+                        pos_hint: {'center_x': .5, 'center_y': .5}
+                        on_release: app.show_theme_picker()
+                # MDBoxLayout:
+                #     orientation: 'vertical'
+                #     MDBoxLayout:
+                #         orientation: 'horizontal'
+                #         adaptive_height: True
+                #         MDLabel:
+                #             text:"Light-mode"
+                #         MDSwitch:
+                #             #pos_hint: {"center_X": .7, "center_y": 0}
+                #             on_active: app.change_mode(*args)
+                #         MDLabel:
+                #             text:""
+                #     MDLabel:
+                #         text: ""

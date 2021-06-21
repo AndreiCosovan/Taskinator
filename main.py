@@ -1,23 +1,17 @@
 import kivy
 from kivymd.app import MDApp
-from WindowManager import WindowManager
-kivy.require('2.0.0')  # replace with your current kivy version !
+kivy.require('2.0.0')  
 from kivy.lang import Builder
-from WindowManager import WindowManager
-from kivymd.uix.picker import MDDatePicker
+from kivymd.uix.picker import MDDatePicker, MDThemePicker
 from Storage import Storage
 from kivymd.uix.list import IconLeftWidget, IconRightWidget, ThreeLineAvatarIconListItem
 from functools import partial
 from kivymd.uix.dialog import MDDialog
 from kivymd.uix.button import MDFlatButton
 import uuid
-#kv = Builder.load_file("to_do_.kv")
-sm = WindowManager()
+
 storage = Storage()
-#screens = [MainWindow.MainWindow(name="MainWindow")]
-#for screen in screens:
-#    sm.add_widget(screen)
-#sm.current = "MainWindow"
+
 
 
 
@@ -29,7 +23,10 @@ class to_do_App(MDApp):
     dialog = None
     def build(self):
         self.root = Builder.load_file('to_do_.kv')
-        self.theme_cls.theme_style = "Dark"
+        settings=storage.get_settings()
+        self.theme_cls.theme_style = settings["mode"]
+        self.theme_cls.primary_palette = settings["theme"]
+        self.theme_cls.accent_palette=settings["accent"]
         task_list = self.read_tasks()
         self.load_tasks(task_list)       
 
@@ -126,7 +123,28 @@ class to_do_App(MDApp):
             size_hint=(0.7, 1)
         )
         self.dialog.open()
+
+    # def change_mode(self, checkbox, value):
+
+    #     if value:
+    #         self.theme_cls.theme_style = "Light" 
+    #     else:
+    #         self.theme_cls.theme_style = "Dark"
+
+    def show_theme_picker(self):
+        before_theme=self.theme_cls.theme_style
+        self.theme_cls.theme_style = "Dark"
+        picker = MDThemePicker(on_dismiss=self.save_settings)
+        self.theme_cls.theme_style = before_theme
+        picker.open()
         
+
+    def save_settings(self, kwargs):
+        settings=dict()
+        settings["mode"]=self.theme_cls.theme_style
+        settings["theme"]=self.theme_cls.primary_palette
+        settings["accent"]=self.theme_cls.accent_palette
+        storage.save_settings(settings)
 
 
 
