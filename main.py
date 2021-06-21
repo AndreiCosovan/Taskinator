@@ -4,7 +4,6 @@ from WindowManager import WindowManager
 kivy.require('2.0.0')  # replace with your current kivy version !
 from kivy.lang import Builder
 from WindowManager import WindowManager
-from screens import MainWindow
 from kivymd.uix.picker import MDDatePicker
 from Storage import Storage
 from kivymd.uix.list import IconLeftWidget, IconRightWidget, ThreeLineAvatarIconListItem
@@ -51,9 +50,9 @@ class to_do_App(MDApp):
         task_name = self.root.ids.input_of_to_do.text
         due_date = self.root.ids.date_label.text
         if self.root.ids.important_label.text == "Important!":
-            is_important = True
+            is_important = "Important"
         else:
-            is_important = False
+            is_important = "Not important"
         task = {
             "name": task_name,
             "due_date": due_date,
