@@ -5,23 +5,27 @@ FloatLayout:
     BoxLayout:
         orientation:'vertical'
         MDToolbar:
-            title: "ADD A TASK!"
+            title: "HOME"
+            id: toolbar
 
         MDBottomNavigation:
             MDBottomNavigationItem:
                 name: 'Homescreen'
                 text: 'Home'
                 icon: 'home-outline'
+                on_tab_release:app.change_toolbar("HOME")
                 ScrollView:
 
                     MDList:
                         id: to_do_container
+               
 
 
             MDBottomNavigationItem:
                 name: 'addToDoScreen'
                 text: 'add'
                 icon: 'plus-outline'
+                on_tab_release:app.change_toolbar("ADD A TASK!")
                 MDBoxLayout:
                     orientation: 'vertical'
                     MDTextField:
@@ -64,12 +68,14 @@ FloatLayout:
                 name: 'statisticsScreen'
                 text: 'stats'
                 icon: 'clipboard-check'
+                on_tab_release:app.change_toolbar("STATISTICS")
 
 
             MDBottomNavigationItem:
                 name: 'settingsScreen'
                 text: 'settings'
                 icon: 'settings'
+                on_tab_release:app.change_toolbar("SETTINGS")
                 MDFloatLayout:
                     MDRaisedButton:
                         text: "Open theme picker"

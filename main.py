@@ -146,6 +146,9 @@ class to_do_App(MDApp):
         settings["accent"]=self.theme_cls.accent_palette
         storage.save_settings(settings)
 
+    def change_toolbar(self, title):
+        self.root.ids.toolbar.title = title
+
 
 
 
