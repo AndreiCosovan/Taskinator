@@ -1,4 +1,5 @@
 import kivy
+from kivy.config import Config
 from kivymd.app import MDApp
 kivy.require('2.0.0')  
 from kivy.lang import Builder
@@ -9,6 +10,7 @@ from functools import partial
 from kivymd.uix.dialog import MDDialog
 from kivymd.uix.button import MDFlatButton
 import uuid
+from datetime import datetime
 
 storage = Storage()
 
@@ -19,16 +21,20 @@ storage = Storage()
 
 
 
-class to_do_App(MDApp):
+class TaskinatorApp(MDApp):
     dialog = None
     def build(self):
-        self.root = Builder.load_file('to_do_.kv')
+        
+        self.root = Builder.load_file('Taskinator.kv')
         settings=storage.get_settings()
         self.theme_cls.theme_style = settings["mode"]
         self.theme_cls.primary_palette = settings["theme"]
         self.theme_cls.accent_palette=settings["accent"]
         task_list = self.read_tasks()
         self.load_tasks(task_list)       
+        self.set_tasks_awaiting(task_list)
+        self.set_tasks_done(task_list)
+        self.set_most_effective_weekday(task_list)
 
     def show_date_picker(self):
         date_dialog = MDDatePicker(callback=self.on_save)
@@ -55,29 +61,36 @@ class to_do_App(MDApp):
             "due_date": due_date,
             "is_important": is_important,
             "is_done": False,
+            "weekday": "",
             "id": str(uuid.uuid1())
         }
         task_list = self.read_tasks()
         task_list.append(task)
         self.reload_tasks(task_list)     
-        storage.save_data(task_list)
+        storage.save_tasks(task_list)
         
-    def task_on_release(self, args, kwargs):
-        args["is_done"]=True if args["is_done"]==False else False
-        self.update_task(args)
+        
+    def task_on_release(self, task, kwargs):
+        task["is_done"]=True if task["is_done"]==False else False
+        weekday=datetime.now().strftime("%A")
+        task["weekday"]=weekday if task["is_done"]==True else ""
+        #print(task["weekday"])
+        self.update_task(task)
 
     def update_task(self, task_to_change):
         task_list = self.read_tasks()
         for task in task_list:
             if task["id"]==task_to_change["id"]:
-                task["is_done"] = task_to_change["is_done"]
+                task["is_done"]=task_to_change["is_done"]
+                task["weekday"]=task_to_change["weekday"]
                 break
-        storage.save_data(task_list)
+        storage.save_tasks(task_list)
         self.reload_tasks(task_list)
+        
 
     def read_tasks(self):
         try:
-            task_list = list(storage.get_data())
+            task_list = list(storage.get_tasks())
         except:
             task_list=list()
         return task_list
@@ -85,6 +98,9 @@ class to_do_App(MDApp):
     def reload_tasks(self, task_list):
         self.root.ids.to_do_container.clear_widgets()
         self.load_tasks(task_list)
+        self.set_tasks_awaiting(task_list)
+        self.set_tasks_done(task_list)
+        self.set_most_effective_weekday(task_list)
 
     def load_tasks(self, task_list):
         for task in task_list:
@@ -100,7 +116,7 @@ class to_do_App(MDApp):
     def remove_task(self, task, kwargs):
         task_list = self.read_tasks()
         new_list = [i for i in task_list if not (i['id'] == task['id'])]
-        storage.save_data(new_list)
+        storage.save_tasks(new_list)
         self.reload_tasks(new_list)
         self.close_dialog(None)
 
@@ -124,12 +140,6 @@ class to_do_App(MDApp):
         )
         self.dialog.open()
 
-    # def change_mode(self, checkbox, value):
-
-    #     if value:
-    #         self.theme_cls.theme_style = "Light" 
-    #     else:
-    #         self.theme_cls.theme_style = "Dark"
 
     def show_theme_picker(self):
         before_theme=self.theme_cls.theme_style
@@ -149,11 +159,45 @@ class to_do_App(MDApp):
     def change_toolbar(self, title):
         self.root.ids.toolbar.title = title
 
+    def set_tasks_awaiting(self, task_list):
+        tasks_awaiting=0
+        for task in task_list:
+            if task["is_done"]==False:
+                tasks_awaiting += 1
+
+        self.root.ids.tasks_awaiting.text="Tasks awaiting: {}".format(tasks_awaiting)
+
+    def set_tasks_done(self, task_list):
+        tasks_done=0
+        for task in task_list:
+            if task["is_done"]==True:
+                tasks_done += 1
+
+        self.root.ids.tasks_done.text="Tasks done: {}".format(tasks_done)
+
+    def calculate_most_effective_weekday(self, task_list):
+        for task in task_list:
+            if task["is_done"]==True:
+                weekday_list=list()
+                weekday_list.append(task["weekday"])
+                return max(set(weekday_list), key = weekday_list.count)
+
+            else:
+                return "There are no tasks done."
+        return "There are no tasks done."
+
+    def set_most_effective_weekday(self, task_list):
+        most_effective_weekday=self.calculate_most_effective_weekday(task_list)
+
+        self.root.ids.most_effective_weekday.text="Most effective weekday: {}".format(most_effective_weekday)
+
+
+
 
 
 
 if __name__ == '__main__':
-    to_do_App().run()
+    TaskinatorApp().run()
 
 
 

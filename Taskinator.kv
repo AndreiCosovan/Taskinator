@@ -15,12 +15,8 @@ FloatLayout:
                 icon: 'home-outline'
                 on_tab_release:app.change_toolbar("HOME")
                 ScrollView:
-
                     MDList:
                         id: to_do_container
-               
-
-
             MDBottomNavigationItem:
                 name: 'addToDoScreen'
                 text: 'add'
@@ -70,6 +66,23 @@ FloatLayout:
                 icon: 'clipboard-check'
                 on_tab_release:app.change_toolbar("STATISTICS")
 
+                MDBoxLayout:
+                    orientation: "vertical"
+                    OneLineListItem:
+                        text: "Tasks done:"
+                        id: tasks_done
+
+                    OneLineListItem:
+                        text: "Tasks awaiting:"
+                        id: tasks_awaiting
+
+                    OneLineListItem:
+                        text: "Most effective weekday:"
+                        id: most_effective_weekday
+                    
+                    MDLabel: 
+                        text: ""
+
 
             MDBottomNavigationItem:
                 name: 'settingsScreen'
@@ -81,17 +94,4 @@ FloatLayout:
                         text: "Open theme picker"
                         pos_hint: {'center_x': .5, 'center_y': .5}
                         on_release: app.show_theme_picker()
-                # MDBoxLayout:
-                #     orientation: 'vertical'
-                #     MDBoxLayout:
-                #         orientation: 'horizontal'
-                #         adaptive_height: True
-                #         MDLabel:
-                #             text:"Light-mode"
-                #         MDSwitch:
-                #             #pos_hint: {"center_X": .7, "center_y": 0}
-                #             on_active: app.change_mode(*args)
-                #         MDLabel:
-                #             text:""
-                #     MDLabel:
-                #         text: ""
+

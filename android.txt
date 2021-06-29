@@ -1,0 +1,3 @@
+title=Taskinator
+author=Andrei Cosovan
+orientation=portrait

@@ -1,12 +1,12 @@
 import json
 
 class Storage:
-    def save_data(self, data):
+    def save_tasks(self, data):
         with open("to_dos.json", "w", encoding='utf-8') as to_dos:
             json.dump(data, to_dos, ensure_ascii=False)
 
 
-    def get_data(self):
+    def get_tasks(self):
         with open("to_dos.json", "r", encoding='utf-8') as to_dos:
             data = json.load(to_dos)
             return data 
