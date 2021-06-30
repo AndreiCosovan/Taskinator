@@ -118,7 +118,7 @@ FloatLayout:
 class TaskinatorApp(MDApp):
     dialog = None
     def build(self):
-        
+        """Initializes the App"""
         self.root = Builder.load_string(kv_string)
 
         settings=self.get_settings()
@@ -137,15 +137,19 @@ class TaskinatorApp(MDApp):
         date_dialog.open()
 
     def on_save(self, instance, value, date_range):
+        """Saves value of Date picker"""
         self.root.ids.date_label.text = str(value)
 
     def on_important_checkbox_active(self, checkbox, value):
+        """Switches value of importance when adding a task"""
         if value:
             self.root.ids.important_label.text = "Important!"
         else:
             self.root.ids.important_label.text = "Not important!"
 
     def add_task(self):
+        """adds and saves new tasks"""
+        #gets data
         task_name = self.root.ids.input_of_to_do.text
         due_date = self.root.ids.date_label.text
         if self.root.ids.important_label.text == "Important!":
@@ -160,23 +164,26 @@ class TaskinatorApp(MDApp):
             "weekday": "",
             "id": str(uuid.uuid1())
         }
+        #adds data
         task_list = self.read_tasks()
         task_list.append(task)
         self.reload_tasks(task_list)     
         self.save_tasks(task_list)
+        #reloads screen
         self.root.ids.input_of_to_do.text=""
         self.root.ids.date_label.text="No due date picked!"
         self.root.ids.important_checkbox.value=False
         
         
     def task_on_release(self, task, kwargs):
+        """Changes the is_done state and the weekday done of a task"""
         task["is_done"]=True if task["is_done"]==False else False
         weekday=datetime.now().strftime("%A")
         task["weekday"]=weekday if task["is_done"]==True else ""
-        #print(task["weekday"])
         self.update_task(task)
 
     def update_task(self, task_to_change):
+        """updates and saves the is_done state and weekday done of a task"""
         task_list = self.read_tasks()
         for task in task_list:
             if task["id"]==task_to_change["id"]:
@@ -195,6 +202,7 @@ class TaskinatorApp(MDApp):
         return task_list
 
     def reload_tasks(self, task_list):
+        """reloads the tasks on the homepage."""
         self.root.ids.to_do_container.clear_widgets()
         self.load_tasks(task_list)
         self.set_tasks_awaiting(task_list)
@@ -202,6 +210,7 @@ class TaskinatorApp(MDApp):
         self.set_most_effective_weekday(task_list)
 
     def load_tasks(self, task_list):
+        """Shows tasks on the homepage"""
         for task in task_list:
             
             list_item = ThreeLineAvatarIconListItem(text=task["name"], secondary_text=task["due_date"], tertiary_text=str(task["is_important"]), on_release=partial(self.task_on_release, task))
@@ -220,11 +229,13 @@ class TaskinatorApp(MDApp):
         self.close_dialog(None)
 
     def close_dialog(self, kwargs):
+        """closes the dialog when removing a task."""
         self.dialog.dismiss()
         
         
 
     def show_remove_task_alert_dialog(self, task, kwargs):
+        """shows the dialog when removing a task"""
         self.dialog = MDDialog(
             text="Remove task?",
             buttons=[
@@ -241,10 +252,7 @@ class TaskinatorApp(MDApp):
 
 
     def show_theme_picker(self):
-        #before_theme=self.theme_cls.theme_style
-        #self.theme_cls.theme_style = "Dark"
         picker = MDThemePicker(on_dismiss=self.save_theme_settings)
-        #self.theme_cls.theme_style = before_theme
         picker.open()
         
 
@@ -256,9 +264,11 @@ class TaskinatorApp(MDApp):
         self.save_settings(settings)
 
     def change_toolbar(self, title):
+        """Changes the text of the toolbar when clicking on another navigation item"""
         self.root.ids.toolbar.title = title
 
     def set_tasks_awaiting(self, task_list):
+        """calculates and shows the tasks awaiting to be done"""
         tasks_awaiting=0
         for task in task_list:
             if task["is_done"]==False:
@@ -267,6 +277,7 @@ class TaskinatorApp(MDApp):
         self.root.ids.tasks_awaiting.text="Tasks awaiting: {}".format(tasks_awaiting)
 
     def set_tasks_done(self, task_list):
+        """calculates the tasks already done"""
         tasks_done=0
         for task in task_list:
             if task["is_done"]==True:
@@ -286,6 +297,7 @@ class TaskinatorApp(MDApp):
         return "There are no tasks done."
 
     def set_most_effective_weekday(self, task_list):
+        """shows most effective weekday"""
         most_effective_weekday=self.calculate_most_effective_weekday(task_list)
 
         self.root.ids.most_effective_weekday.text="Most effective weekday: {}".format(most_effective_weekday)
