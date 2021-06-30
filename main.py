@@ -1,21 +1,115 @@
 import kivy
 from kivy.config import Config
 from kivymd.app import MDApp
-kivy.require('2.0.0')  
 from kivy.lang import Builder
 from kivymd.uix.picker import MDDatePicker, MDThemePicker
-from Storage import Storage
 from kivymd.uix.list import IconLeftWidget, IconRightWidget, ThreeLineAvatarIconListItem
 from functools import partial
 from kivymd.uix.dialog import MDDialog
 from kivymd.uix.button import MDFlatButton
 import uuid
 from datetime import datetime
-
-storage = Storage()
-
+import json
 
 
+
+kv_string= '''
+
+FloatLayout:
+    cols:1
+    BoxLayout:
+        orientation:'vertical'
+        MDToolbar:
+            title: "HOME"
+            id: toolbar
+
+        MDBottomNavigation:
+            MDBottomNavigationItem:
+                name: 'Homescreen'
+                text: 'Home'
+                icon: 'home-outline'
+                on_tab_release:app.change_toolbar("HOME")
+                ScrollView:
+                    MDList:
+                        id: to_do_container
+            MDBottomNavigationItem:
+                name: 'addToDoScreen'
+                text: 'add'
+                icon: 'plus-outline'
+                on_tab_release:app.change_toolbar("ADD A TASK!")
+                MDBoxLayout:
+                    orientation: 'vertical'
+                    MDTextField:
+                        id: input_of_to_do
+                        hint_text: "Type in your Task!"
+                        pos_hint: {'x': 0, 'y': 0}
+
+                    MDBoxLayout:
+                        orientation: 'horizontal'
+                        adaptive_height: True
+                        MDIconButton:
+                            icon: "calendar"
+                            on_release: app.show_date_picker()
+                        MDLabel:
+                            id: date_label
+                            text: "No due date picked!"
+                            theme_text_color: "Primary"
+                            #text_color: app.theme_cls.accent_palette
+                    MDBoxLayout:
+                        orientation: 'horizontal'
+                        adaptive_height: True
+                        MDCheckbox:
+                            id: important_checkbox
+                            size_hint: None, None
+                            size: "48dp", "48dp"
+                            on_active: app.on_important_checkbox_active(*args)
+                        MDLabel:
+                            id: important_label
+                            text: "Not important!"
+                            theme_text_color: "Primary"
+
+                    MDFillRoundFlatButton:
+                        text:"ADD"
+                        pos_hint: {"center_x": 0.9, "center_y": .5}
+                        on_release: app.add_task()
+                    MDLabel:
+                        text: ""
+            MDBottomNavigationItem:
+                name: 'statisticsScreen'
+                text: 'stats'
+                icon: 'clipboard-check'
+                on_tab_release:app.change_toolbar("STATISTICS")
+
+                MDBoxLayout:
+                    orientation: "vertical"
+                    OneLineListItem:
+                        text: "Tasks done:"
+                        id: tasks_done
+
+                    OneLineListItem:
+                        text: "Tasks awaiting:"
+                        id: tasks_awaiting
+
+                    OneLineListItem:
+                        text: "Most effective weekday:"
+                        id: most_effective_weekday
+                    
+                    MDLabel: 
+                        text: ""
+
+
+            MDBottomNavigationItem:
+                name: 'settingsScreen'
+                text: 'settings'
+                icon: 'settings-outline'
+                on_tab_release:app.change_toolbar("SETTINGS")
+                MDFloatLayout:
+                    MDRaisedButton:
+                        text: "Open theme picker"
+                        pos_hint: {'center_x': .5, 'center_y': .5}
+                        on_release: app.show_theme_picker()
+
+'''
 
 
 
@@ -25,8 +119,9 @@ class TaskinatorApp(MDApp):
     dialog = None
     def build(self):
         
-        self.root = Builder.load_file('Taskinator.kv')
-        settings=storage.get_settings()
+        self.root = Builder.load_string(kv_string)
+
+        settings=self.get_settings()
         self.theme_cls.theme_style = settings["mode"]
         self.theme_cls.primary_palette = settings["theme"]
         self.theme_cls.accent_palette=settings["accent"]
@@ -37,11 +132,12 @@ class TaskinatorApp(MDApp):
         self.set_most_effective_weekday(task_list)
 
     def show_date_picker(self):
-        date_dialog = MDDatePicker(callback=self.on_save)
+        date_dialog = MDDatePicker()
+        date_dialog.bind(on_save=self.on_save)
         date_dialog.open()
 
-    def on_save(self, date):
-        self.root.ids.date_label.text = str(date)
+    def on_save(self, instance, value, date_range):
+        self.root.ids.date_label.text = str(value)
 
     def on_important_checkbox_active(self, checkbox, value):
         if value:
@@ -67,7 +163,10 @@ class TaskinatorApp(MDApp):
         task_list = self.read_tasks()
         task_list.append(task)
         self.reload_tasks(task_list)     
-        storage.save_tasks(task_list)
+        self.save_tasks(task_list)
+        self.root.ids.input_of_to_do.text=""
+        self.root.ids.date_label.text="No due date picked!"
+        self.root.ids.important_checkbox.value=False
         
         
     def task_on_release(self, task, kwargs):
@@ -84,13 +183,13 @@ class TaskinatorApp(MDApp):
                 task["is_done"]=task_to_change["is_done"]
                 task["weekday"]=task_to_change["weekday"]
                 break
-        storage.save_tasks(task_list)
+        self.save_tasks(task_list)
         self.reload_tasks(task_list)
         
 
     def read_tasks(self):
         try:
-            task_list = list(storage.get_tasks())
+            task_list = list(self.get_tasks())
         except:
             task_list=list()
         return task_list
@@ -116,7 +215,7 @@ class TaskinatorApp(MDApp):
     def remove_task(self, task, kwargs):
         task_list = self.read_tasks()
         new_list = [i for i in task_list if not (i['id'] == task['id'])]
-        storage.save_tasks(new_list)
+        self.save_tasks(new_list)
         self.reload_tasks(new_list)
         self.close_dialog(None)
 
@@ -142,19 +241,19 @@ class TaskinatorApp(MDApp):
 
 
     def show_theme_picker(self):
-        before_theme=self.theme_cls.theme_style
-        self.theme_cls.theme_style = "Dark"
-        picker = MDThemePicker(on_dismiss=self.save_settings)
-        self.theme_cls.theme_style = before_theme
+        #before_theme=self.theme_cls.theme_style
+        #self.theme_cls.theme_style = "Dark"
+        picker = MDThemePicker(on_dismiss=self.save_theme_settings)
+        #self.theme_cls.theme_style = before_theme
         picker.open()
         
 
-    def save_settings(self, kwargs):
+    def save_theme_settings(self, kwargs):
         settings=dict()
         settings["mode"]=self.theme_cls.theme_style
         settings["theme"]=self.theme_cls.primary_palette
         settings["accent"]=self.theme_cls.accent_palette
-        storage.save_settings(settings)
+        self.save_settings(settings)
 
     def change_toolbar(self, title):
         self.root.ids.toolbar.title = title
@@ -190,6 +289,28 @@ class TaskinatorApp(MDApp):
         most_effective_weekday=self.calculate_most_effective_weekday(task_list)
 
         self.root.ids.most_effective_weekday.text="Most effective weekday: {}".format(most_effective_weekday)
+
+    def save_tasks(self, data):
+        with open("to_dos.json", "w", encoding='utf-8') as to_dos:
+            json.dump(data, to_dos, ensure_ascii=False)
+
+    def get_tasks(self):
+        with open("to_dos.json", "r", encoding='utf-8') as to_dos:
+            data = json.load(to_dos)
+            return data 
+
+    def save_settings(self, data):
+        with open("app_settings.json", "w", encoding='utf-8') as settings:
+            json.dump(data, settings, ensure_ascii=False) 
+
+    def get_settings(self):
+        try:
+            with open("app_settings.json", "r", encoding='utf-8') as settings:
+                data = json.load(settings)
+                return data 
+        except:
+            self.save_settings({"mode": "Dark", "theme": "Red", "accent": "Pink"})
+            return {"mode": "Dark", "theme": "Red", "accent": "Pink"}
 
 
 
